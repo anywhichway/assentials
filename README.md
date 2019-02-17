@@ -92,26 +92,39 @@ All sequence processing functions take one of more functions or literal values a
 
 `async any route(any condition,function||any arg)(input)`
 
- * Tests the `condition` against the `input`, and if `true` process each arg until the end or one evaluates to `undefined`. Always returns the `input`. Think of it like a package routing through many handlers who may look at or modify the contents of the package, but at the end of the day must deliver it to the next recipient in the chain before it utlimately gets delivered to the requestor.
+ * Tests the `condition` against the `input`, and if `true` process each arg until the end or one evaluates to `undefined` or 
+ `{value: any value, done:  boolean true}`. Note: if returning a done indicator, it must have at most two keys, `done` and `value` or just `done`. This minimizes the chance of accidental aborts which would be hard to debug.
+ 
+ * Always returns the `input` or `{value,done:true}`. Think of it like a package routing through many handlers who may look at or modify the contents of the package, but at the end of the day must deliver it to the next recipient in the chain before it utlimately gets delivered to the requestor, unless a valid substituion is provided via  `{value,done:true}`.
  
  * If the `condition` is a function it receives the argument and must return true if the route is to continue.
  
  * If the `condition` is a `RegExp`, a single string argument is expected that must match the `RegExp` for the route to continue.
  
- * Otherwise, a single argument is expected that must exact equal or deep equal the `condition`. This will even work with `Map` and `Set`, e.g.
+ * Otherwise, a single value is expected that must exact equal or deep equal the `condition`. This will even work with `Map` and `Set`, e.g.
  
  ```javascript
  const handler = assentials.router(
- 	route(new Set(1,2),(item) => ...),
+ 	route(new Set("a","b"),(item) => ...),
  	route({age:21},(item) => ...)
  )
  ```
  
- * For convenience, there is a `router(route aRoute[,...])` which takes a bunch or routes as its arguments. This function is itself a route whose first condition is always met. This allows nesting of routes. Typically, routes will be used with destructuring assignment or literal object testing. You can route just about any object, but frequently they will be http request/response pairs or browser events, e.g.
+ * For convenience, there is a `router(route aRoute[,...])` which takes a bunch of routes as its arguments. This function is itself a route whose first condition is always met. This allows nesting of routes.
+ 
+ * When used in the context of a `router`, a `route` that returns `{done: true}` will cause the router to immediatelly return; whereas `undefined` will allow the next route to be processed. 
+ 
+ * Typically, routes will be used with destructuring assignment or object deep equal testing. You can route just about any object, but frequently they will be http request/response pairs or browser events, e.g.
  
  ```javascript
  const handler = assentials.router(
- 	route(({request:{url}}) => url!=null,({request}) => request.location = new Location(url)),
+ 	// normalized urls to industry standard URL object
+ 	route(({request:{url}}) => url!=null,({request}) => request.url = new URL(url)),
+ 	// literal match on "/" to change to "/index.html"
+ 	route({request:{url:{pathname:"/"}},({request}) => request.url.pathname = "/index.html"),
+ 	// if no request, abort
+ 	route(({request:{body}}) => !body || body.length=0, ({response}) => { response.end(""); return {done:true}; }),
+ 	// parse the body
  	route(({request:{body}}) => body.length>0, ({request}) => request.body = bodyParser(request.body)),
  	...
  	route(({response:{sent}}) => !sent,({response}) => { response.status = 404; response.end("Not Found"); })
@@ -128,7 +141,7 @@ All sequence processing functions take one of more functions or literal values a
 
 `async any when(any condition,function||any arg)(input)`
 
- * Tests the `condition` against the `input`, and if `true` process each arg until the end or one evaluates to `undefined`. Returns the last evalutation. Otherwise, if the condition fails, returns the `input`.
+ * Tests the `condition` against the `input`, and if `true` process each arg until the end or one evaluates to `undefined` or `{value: any value, done:  boolean true}`. Note: if returning a done indicator, it must have at most two keys, `done` and `value` or just `done`. This minimizes the chance of accidental aborts which would be hard to debug. Returns the last evalutation. Otherwise, if the condition fails, returns the `input`.
  
  * See `route` for how `condition` is tested.
 
@@ -145,6 +158,10 @@ Calls all the functions with the provided arguments. If any are asynchronous wil
 For the iterating functions, `assentials` first turns the target of iteration into an asynchronous generator. This allows all subsequent logic to, for the most part, avoid conditionalizing on the type of item being iterated and keeps the code base small and easy to test.
 
 # Updates (reverse chronological order)
+
+2019-02-18 v1.0.4b Added support for the `Iterable` continuation object `{value,done}` with `when` and `route`.
+
+2019-02-18 v1.0.3b Minor deep equal enhancement.
 
 2019-02-16 v1.0.2b Added object literal routing.
 

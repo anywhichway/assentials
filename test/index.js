@@ -104,7 +104,7 @@ describe("forEach",function() {
 		const result = [];
 		await assentials.forEach({name:"joe",address:{city:"Seattle",zipcode:{base:"98101"}},age:27},item => result.push(item),true);
 		expect(result.length).equal(6);
-		console.log(result);
+		//console.log(result);
 	})
 });
 
@@ -229,7 +229,7 @@ describe("route",function() {
 		const result = await assentials.route(({sum}) => typeof(sum)==="number",o => o.sum+=1,o => o.sum+=2,o => o.sum+=3)({sum:0});
 		expect(result.sum).equal(6);
 	});
-	describe("router",async () => {
+	describe("router",function() {
 		let regexp, num, object, map, set;
 		const router = assentials.router(
 				assentials.route(({id})=>id===1,(item) => item.done=true),
@@ -237,7 +237,9 @@ describe("route",function() {
 				assentials.route(1,(item) => num = item),
 				assentials.route({name:"joe",age:27},(item) => object = true),
 				assentials.route(new Map([[1,1],[2,2]]),(item) => map = true),
-				assentials.route(new Set([1,2]),(item) => set = true)
+				assentials.route(new Set([1,2]),(item) => set = true),
+				assentials.route(1,() => { return {done:true}; }),
+				assentials.route(1,() => num = undefined),
 				);
 		it("object", async () => {
 			const result = await router({id:1});
@@ -256,9 +258,10 @@ describe("route",function() {
 			const result = await router("anotherPath");
 			expect(regexp).equal(undefined);
 		});
-		it("literal", async () => {
+		it("literal with done", async () => {
 			const result = await router(1);
 			expect(num).equal(1);
+			expect(result.done).equal(true);
 		});
 		it("literal fail", async () => {
 			num = undefined;

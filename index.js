@@ -11,15 +11,17 @@
 		  	if(a instanceof Date) {
 		  		if(!(b instanceof Date)) return false;
 		  		return a.getTime()===b.getTime();
-		  	}
-		  	if(a instanceof Map) {
+		  	} else if(Array.isArray(a)) {
+		  		if(!Array.isArray(b)) return false;
+		  		if(a.length!==b.length) return false;
+		  	} else if(a instanceof Map) {
 		  		if(!(b instanceof Map)) return false;
 		  		if(a.size!==b.size) return false;
 		  		for(const [key,value] of a) {
 		  			if(!deepEqual(b.get(key),value)) return false;
 		  		}
-		  	}
-		  	if(a instanceof Set) {
+		  		return true;
+		  	} else if(a instanceof Set) {
 		  		if(!(b instanceof Set)) return false;
 		  		if(a.size!==b.size) return false;
 		  		const results = new Set();
@@ -36,8 +38,9 @@
 		  		}
 		  		if(results.size!=a.size) return false;
 		  		return true;
+		  	} else{
+			    return Object.keys(a).every(function(key) { return deepEqual(a[key],b[key]); });
 		  	}
-		    return Object.keys(a).every(function(key) { return deepEqual(a[key],b[key]); });
 		  }
 		  return false;
 		},
@@ -241,31 +244,46 @@
 	// evaluates the results using the arg until one is undefined or all are evaluated, return final evaluation
 	// else returns the arg passed in  (which may have been modified)
 	when = (condition,...results) => async (arg) => {
+		let done;
 		if(await toTest(condition)(arg)) {
 			let result;
-			for(const value of results) {
+			for(let value of results) {
 				if(typeof(value)==="function") {
 					result = await value(arg);
 				}
-				if(result===undefined) break;
+				if(result && typeof(result)==="object") {
+					const keys = Object.keys(result);
+					if(keys.length<=2 && value.done && keys.every(key => key==="done" || key==="value")) {
+						done = result;
+					}
+				}
+				if(result===undefined || done) break;
 			}
 			return result;
 		}
 		return arg;
 	},
 	// if condition (a function, a RegExp, a literal to compare to arg) is true; 
-	// evaluates the results using the arg until one is undefined or all are evaluated
-	// regardless of results, returns the arg passed in (which may have been modified)
+	// evaluates the results using the arg until one is undefined, {done: true}, or all are evaluated
+	// regardless of results, returns the arg passed in (which may have been modified) unless
+	// the evaluation was {value,done:true}, in which case that is returned
 	route = (condition,...results) => async (arg) => {
+		let done;
 		if(await toTest(condition)(arg)) {
 			for(let value of results) {
 				if(typeof(value)==="function") {
 					value = await value(arg);
 				}
-				if(value===undefined) break;
+				if(value && typeof(value)==="object") {
+					const keys = Object.keys(value);
+					if(keys.length<=2 && value.done && keys.every(key => key==="done" || key==="value")) {
+						done = value;
+					}
+				}
+				if(value===undefined || done) break;
 			}
 		}
-		return arg;
+		return done || arg;
 	},
 	router = (...routes) => {
 		return route(()=>true,...routes);
