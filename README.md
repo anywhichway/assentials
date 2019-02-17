@@ -90,13 +90,26 @@ All sequence processing functions take one of more functions or literal values a
 
 * Processes each argument by providing as an input the output of the previous argument's evaluation. As a result, any literals will simply replace the value from upstream and become the input for the next argument's evaluation. The flow will continue through the last argument and return its evaluation. Functions within the flow must know how to handle `undefined` if an upstream argument can possible evaluate to `undefined`.
 
-`async any route(function||RegExp||boolean||number||string condition,function||any arg[,...])(input)`
+`async any route(any condition,function||any arg)(input)`
 
  * Tests the `condition` against the `input`, and if `true` process each arg until the end or one evaluates to `undefined`. Always returns the `input`. Think of it like a package routing through many handlers who may look at or modify the contents of the package, but at the end of the day must deliver it to the next recipient in the chain before it utlimately gets delivered to the requestor.
  
- * For convenience, there is a `router(route aRoute[,...])` which takes a bunch or routes as its arguments. This function is itself a route whose first condition is always met. This allows nesting of routes. Typically, routes will be used with destructuring assignment. You can route just about any object, but frequently they will be http request/response pairs or browser events, e.g.
+ * If the `condition` is a function it receives the argument and must return true if the route is to continue.
  
+ * If the `condition` is a `RegExp`, a single string argument is expected that must match the `RegExp` for the route to continue.
+ 
+ * Otherwise, a single argument is expected that must exact equal or deep equal the `condition`. This will even work with `Map` and `Set`, e.g.
+ 
+ ```javascript
+ const handler = assentials.router(
+ 	route(new Set(1,2),(item) => ...),
+ 	route({age:21},(item) => ...)
+ )
  ```
+ 
+ * For convenience, there is a `router(route aRoute[,...])` which takes a bunch or routes as its arguments. This function is itself a route whose first condition is always met. This allows nesting of routes. Typically, routes will be used with destructuring assignment or literal object testing. You can route just about any object, but frequently they will be http request/response pairs or browser events, e.g.
+ 
+ ```javascript
  const handler = assentials.router(
  	route(({request:{url}}) => url!=null,({request}) => request.location = new Location(url)),
  	route(({request:{body}}) => body.length>0, ({request}) => request.body = bodyParser(request.body)),
@@ -113,9 +126,11 @@ All sequence processing functions take one of more functions or literal values a
  You can also use a router for generalized destructive object transformation, which is effectively what is happening above. For non-destructive transformation us `map`.
  
 
-`async any when(function||RegExp||boolean||number||string condition,function||any arg[,...])(input)`
+`async any when(any condition,function||any arg)(input)`
 
  * Tests the `condition` against the `input`, and if `true` process each arg until the end or one evaluates to `undefined`. Returns the last evalutation. Otherwise, if the condition fails, returns the `input`.
+ 
+ * See `route` for how `condition` is tested.
 
 
 ## Parallel Processing Functions
@@ -130,5 +145,7 @@ Calls all the functions with the provided arguments. If any are asynchronous wil
 For the iterating functions, `assentials` first turns the target of iteration into an asynchronous generator. This allows all subsequent logic to, for the most part, avoid conditionalizing on the type of item being iterated and keeps the code base small and easy to test.
 
 # Updates (reverse chronological order)
+
+2019-02-16 v1.0.2b Added object literal routing.
 
 2019-02-16 v1.0.0b Initial public release.

@@ -230,11 +230,14 @@ describe("route",function() {
 		expect(result.sum).equal(6);
 	});
 	describe("router",async () => {
-		let regexp, num;
+		let regexp, num, object, map, set;
 		const router = assentials.router(
 				assentials.route(({id})=>id===1,(item) => item.done=true),
 				assentials.route(/aPath/,(item) => regexp = true),
-				assentials.route(1,(item) => num = item)
+				assentials.route(1,(item) => num = item),
+				assentials.route({name:"joe",age:27},(item) => object = true),
+				assentials.route(new Map([[1,1],[2,2]]),(item) => map = true),
+				assentials.route(new Set([1,2]),(item) => set = true)
 				);
 		it("object", async () => {
 			const result = await router({id:1});
@@ -261,6 +264,33 @@ describe("route",function() {
 			num = undefined;
 			const result = await router(2);
 			expect(num).equal(undefined);
+		});
+		it("object", async () => {
+			const result = await router({name:"joe",age:27});
+			expect(object).equal(true);
+		});
+		it("object fail", async () => {
+			object = undefined;
+			const result = await router({name:"joe",age:26});
+			expect(object).equal(undefined);
+		});
+		it("Map", async () => {
+			const result = await router(new Map([[1,1],[2,2]]));
+			expect(map).equal(true);
+		});
+		it("Map fail", async () => {
+			map = undefined;
+			const result = await router(new Map([[1,1],[2,1]]));
+			expect(map).equal(undefined);
+		});
+		it("Set", async () => {
+			const result = await router(new Set([1,2]));
+			expect(set).equal(true);
+		});
+		it("Set fail", async () => {
+			set = undefined;
+			const result = await router(new Set([1,3]));
+			expect(set).equal(undefined);
 		});
 	});
 });

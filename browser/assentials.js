@@ -3,6 +3,44 @@
 	
 	const Generator = Object.getPrototypeOf((function*() {})()).constructor,
 		AsyncGenerator = Object.getPrototypeOf((async function*() {})()).constructor,
+		deepEqual = (a,b) => {
+		  if(a===b) return true;
+		  if(typeof(a)!==typeof(b)) return false;
+		  if((a && !b) || (!a && b)) return false;
+		  if(a && typeof(a)==="object") {
+		  	if(a instanceof Date) {
+		  		if(!(b instanceof Date)) return false;
+		  		return a.getTime()===b.getTime();
+		  	}
+		  	if(a instanceof Map) {
+		  		if(!(b instanceof Map)) return false;
+		  		if(a.size!==b.size) return false;
+		  		for(const [key,value] of a) {
+		  			if(!deepEqual(b.get(key),value)) return false;
+		  		}
+		  	}
+		  	if(a instanceof Set) {
+		  		if(!(b instanceof Set)) return false;
+		  		if(a.size!==b.size) return false;
+		  		const results = new Set();
+		  		for(const avalue of a) {
+		  			if(b.has(avalue)) {
+		  				results.add(avalue);
+		  			} else {
+			  			for(const bvalue of b) {
+			  				if(deepEqual(avalue,bvalue)) {
+			  					results.add(avalue);
+			  				}
+			  			}
+		  			}
+		  		}
+		  		if(results.size!=a.size) return false;
+		  		return true;
+		  	}
+		    return Object.keys(a).every(function(key) { return deepEqual(a[key],b[key]); });
+		  }
+		  return false;
+		},
 		_reduceIterable = async (iterable,f,accum,{continuable,data,tree,nodes}) => {
 		let i = 0;
 		for await(const item of iterable) {
@@ -181,7 +219,7 @@
 				return arg => data.test(arg);
 			}
 		}
-		return arg => arg==data;
+		return arg => deepEqual(arg,data);
 	},
 	// like pipe, but stops when accum is undefined
 	flow = (...values) => async (arg) => {
