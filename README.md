@@ -101,7 +101,7 @@ All sequence processing functions take one of more functions or literal values a
  
  * If the `condition` is a `RegExp`, a single string argument is expected that must match the `RegExp` for the route to continue.
  
- * Otherwise, a single value is expected that must exact equal or deep equal the `condition`. This will even work with `Map` and `Set`, e.g.
+ * Otherwise, a single value is expected that must left equal the `condition`. This will even work with `Map` and `Set`, e.g.
  
  ```javascript
  const handler = assentials.router(
@@ -114,7 +114,7 @@ All sequence processing functions take one of more functions or literal values a
  
  * When used in the context of a `router`, a `route` that returns `{done: true}` will cause the router to immediatelly return; whereas `undefined` will allow the next route to be processed. 
  
- * Typically, routes will be used with destructuring assignment or object deep equal testing. You can route just about any object, but frequently they will be http request/response pairs or browser events, e.g.
+ * Typically, routes will be used with destructuring assignment or object left equal testing. You can route just about any object, but frequently they will be http request/response pairs or browser events, e.g.
  
  ```javascript
  const handler = assentials.router(
@@ -158,6 +158,8 @@ Calls all the functions with the provided arguments. If any are asynchronous wil
 For the iterating functions, `assentials` first turns the target of iteration into an asynchronous generator. This allows all subsequent logic to, for the most part, avoid conditionalizing on the type of item being iterated and keeps the code base small and easy to test.
 
 # Updates (reverse chronological order)
+
+2019-02-19 v1.0.5b Correct object matching for routes to be leftEqual.
 
 2019-02-18 v1.0.4b Added support for the `Iterable` continuation object `{value,done}` with `when` and `route`.
 

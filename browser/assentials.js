@@ -3,7 +3,7 @@
 	
 	const Generator = Object.getPrototypeOf((function*() {})()).constructor,
 		AsyncGenerator = Object.getPrototypeOf((async function*() {})()).constructor,
-		deepEqual = (a,b) => {
+		leftEqual = (a,b) => {
 		  if(a===b) return true;
 		  if(typeof(a)!==typeof(b)) return false;
 		  if((a && !b) || (!a && b)) return false;
@@ -18,7 +18,7 @@
 		  		if(!(b instanceof Map)) return false;
 		  		if(a.size!==b.size) return false;
 		  		for(const [key,value] of a) {
-		  			if(!deepEqual(b.get(key),value)) return false;
+		  			if(!leftEqual(value,b.get(key))) return false;
 		  		}
 		  		return true;
 		  	} else if(a instanceof Set) {
@@ -30,7 +30,7 @@
 		  				results.add(avalue);
 		  			} else {
 			  			for(const bvalue of b) {
-			  				if(deepEqual(avalue,bvalue)) {
+			  				if(leftEqual(avalue,bvalue)) {
 			  					results.add(avalue);
 			  				}
 			  			}
@@ -39,7 +39,7 @@
 		  		if(results.size!=a.size) return false;
 		  		return true;
 		  	} else{
-			    return Object.keys(a).every(function(key) { return deepEqual(a[key],b[key]); });
+			    return Object.keys(a).every(function(key) { return leftEqual(a[key],b[key]); });
 		  	}
 		  }
 		  return false;
@@ -222,7 +222,7 @@
 				return arg => data.test(arg);
 			}
 		}
-		return arg => deepEqual(arg,data);
+		return arg => leftEqual(arg,data);
 	},
 	// like pipe, but stops when accum is undefined
 	flow = (...values) => async (arg) => {
