@@ -159,6 +159,8 @@ For the iterating functions, `assentials` first turns the target of iteration in
 
 # Updates (reverse chronological order)
 
+2019-02-19 v1.0.6b In one case leftEqual switched order or left and right. Fixed.
+
 2019-02-19 v1.0.5b Correct object matching for routes to be leftEqual.
 
 2019-02-18 v1.0.4b Added support for the `Iterable` continuation object `{value,done}` with `when` and `route`.

@@ -222,7 +222,7 @@
 				return arg => data.test(arg);
 			}
 		}
-		return arg => leftEqual(arg,data);
+		return arg => leftEqual(data,arg);
 	},
 	// like pipe, but stops when accum is undefined
 	flow = (...values) => async (arg) => {
