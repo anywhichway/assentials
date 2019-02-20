@@ -214,7 +214,7 @@
 		if(type==="function") {
 			return data;
 		}
-		if(["boolean","number","string"].includes(type)) {
+		if(data===null || ["boolean","number","string"].includes(type)) {
 			return arg => arg===data;
 		}
 		if(data && type==="object") {
@@ -245,7 +245,7 @@
 	// else returns the arg passed in  (which may have been modified)
 	when = (condition,...results) => async (arg) => {
 		let done;
-		if(await toTest(condition)(arg)) {
+		if(condition!==undefined && await toTest(condition)(arg)) {
 			let result;
 			for(let value of results) {
 				if(typeof(value)==="function") {
@@ -253,13 +253,13 @@
 				}
 				if(result && typeof(result)==="object") {
 					const keys = Object.keys(result);
-					if(keys.length<=2 && value.done && keys.every(key => key==="done" || key==="value")) {
+					if(keys.length<=2 && result.done && keys.every(key => key==="done" || key==="value")) {
 						done = result;
 					}
 				}
 				if(result===undefined || done) break;
 			}
-			return result;
+			return done && done.value!==undefined ? done.value : result;
 		}
 		return arg;
 	},
@@ -269,7 +269,7 @@
 	// the evaluation was {value,done:true}, in which case that is returned
 	route = (condition,...results) => async (arg) => {
 		let done;
-		if(await toTest(condition)(arg)) {
+		if(condition!==undefined && await toTest(condition)(arg)) {
 			for(let value of results) {
 				if(typeof(value)==="function") {
 					value = await value(arg);

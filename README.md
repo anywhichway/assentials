@@ -79,7 +79,7 @@ async some(Iterable||object object,
 
 ## Sequential Processing Functions
 
-All sequence processing functions take one of more functions or literal values as their arguments. During processing, literals values are treated like they are functions of the form `(value) => value`.
+All sequence processing functions take one of more functions or literal values as their arguments. During processing, literal values are treated like they are functions of the form `(value) => value`.
 
 `async any flow(function||any arg[,...])(any input)`
 
@@ -88,12 +88,12 @@ All sequence processing functions take one of more functions or literal values a
 
 `async any pipe(function||any arg[,...])(any input)`
 
-* Processes each argument by providing as an input the output of the previous argument's evaluation. As a result, any literals will simply replace the value from upstream and become the input for the next argument's evaluation. The flow will continue through the last argument and return its evaluation. Functions within the flow must know how to handle `undefined` if an upstream argument can possible evaluate to `undefined`.
+* Processes each argument by providing as an input the output of the previous argument's evaluation. As a result, any literals will simply replace the value from upstream and become the input for the next argument's evaluation. The flow will continue through the last argument and return its evaluation. Functions within the flow must know how to handle `undefined` if an upstream argument can possibly evaluate to `undefined`.
 
 `async any route(any condition,function||any arg)(input)`
 
  * Tests the `condition` against the `input`, and if `true` process each arg until the end or one evaluates to `undefined` or 
- `{value: any value, done:  boolean true}`. Note: if returning a done indicator, it must have at most two keys, `done` and `value` or just `done`. This minimizes the chance of accidental aborts which would be hard to debug.
+ `{value: any value, done:  boolean true}`. Note: if returning a done indicator, it must have at most two keys, `done` and `value` or just `done`. This minimizes the chance of accidental aborts when inputs happen to conatin properties by the name `value` or `done`, which would be hard to debug.
  
  * Always returns the `input` or `{value,done:true}`. Think of it like a package routing through many handlers who may look at or modify the contents of the package, but at the end of the day must deliver it to the next recipient in the chain before it utlimately gets delivered to the requestor, unless a valid substituion is provided via  `{value,done:true}`.
  
@@ -101,7 +101,8 @@ All sequence processing functions take one of more functions or literal values a
  
  * If the `condition` is a `RegExp`, a single string argument is expected that must match the `RegExp` for the route to continue.
  
- * Otherwise, a single value is expected that must left equal the `condition`. This will even work with `Map` and `Set`, e.g.
+ * Otherwise, a single value is expected that must left equal the `condition`. This will even work with `null, `Map` and `Set`. 
+ The only thing that can't be matched is `undefined`, e.g.
  
  ```javascript
  const handler = assentials.router(
@@ -158,6 +159,8 @@ Calls all the functions with the provided arguments. If any are asynchronous wil
 For the iterating functions, `assentials` first turns the target of iteration into an asynchronous generator. This allows all subsequent logic to, for the most part, avoid conditionalizing on the type of item being iterated and keeps the code base small and easy to test.
 
 # Updates (reverse chronological order)
+
+2019-02-20 v1.0.7b `router` redefined to use a `when` as its top level to allow it to return the `value` in `{value,done:true}` if it is not `undefined`.
 
 2019-02-19 v1.0.6b In one case leftEqual switched order or left and right. Fixed.
 
