@@ -4,9 +4,13 @@ Essential polymorphic async functions ... every, forEach, map, reduce, some, flo
 
 The `assentials` library provides asynchronous polymorphic versions of `forEach`, `every`, `map`, `reduce` and `some`. By "polymorphic" we mean you can pass in an `Array`, `Map`, `Set`, `generator`, `async generator`, or even an `object`.
 
-The `assentials` library also provides asynchronous sequenced processing of functions, Regular Expressions, and literals through versions of `flow`, `pipe`, `when` and `route`.
+The `assentials` library also provides asynchronous sequenced processing of functions, Regular Expressions, and literals through versions of `flow`, `pipe`, `when`, `route` and `router`.
+
+`router` deserves special attention, it can handle just about anything as a condition. You can use literal matching, object destructuring, regular expressions, or functions as tests. The literal matching includes support for objects including nested values, Sets, and Maps.
 
 Finally, there is a `parallel` function which will provide the same argument to multiple functions and run them in parallel (to the degree JavaScript supports parallel processing). It returns a `Promise` for an array of the final results in the order they are resolved.
+
+All the above in less than 1.5K minimized and gziped, 4.6K minimized, 9.6K raw.
 
 # installation
 
@@ -101,13 +105,13 @@ All sequence processing functions take one of more functions or literal values a
  
  * If the `condition` is a `RegExp`, a single string argument is expected that must match the `RegExp` for the route to continue.
  
- * Otherwise, a single value is expected that must left equal the `condition`. This will even work with `null, `Map` and `Set`. 
- The only thing that can't be matched is `undefined`, e.g.
+ * Otherwise, a single value is expected that must left equal the `condition`. By "left equal" we mean that the values satisfy `===`, or all property value literals referenced in the route condition exist in the value passed in. This will even work with `null`, `Map` and `Set`.  If destructuring is used, then the test must be a function that checks the destructured variables. The only thing that can't be matched is `undefined`. For example,
  
  ```javascript
  const handler = assentials.router(
- 	route(new Set("a","b"),(item) => ...),
- 	route({age:21},(item) => ...)
+ 	route(new Set("a","b"),(item) => ...), // literal left equal test
+ 	route({age:21},(item) => ...), // literal left equal test
+ 	route(({age}) => age>21,(item) => ...) // destructuring function test
  )
  ```
  
@@ -159,6 +163,8 @@ Calls all the functions with the provided arguments. If any are asynchronous wil
 For the iterating functions, `assentials` first turns the target of iteration into an asynchronous generator. This allows all subsequent logic to, for the most part, avoid conditionalizing on the type of item being iterated and keeps the code base small and easy to test.
 
 # Updates (reverse chronological order)
+
+2019-03-03 v1.0.8 documentation updates
 
 2019-02-20 v1.0.7b `router` redefined to use a `when` as its top level to allow it to return the `value` in `{value,done:true}` if it is not `undefined`.
 
