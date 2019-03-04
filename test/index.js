@@ -235,12 +235,35 @@ describe("route",function() {
 				assentials.route(({id})=>id===1,(item) => item.done=true),
 				assentials.route(/aPath/,(item) => regexp = true),
 				assentials.route(1,(item) => num = item),
-				assentials.route({name:"joe",age:27},(item) => object = true),
+				assentials.route({name:"joe",age:27},
+						(item) => {
+							return object = true;
+						}),
 				assentials.route(new Map([[1,1],[2,2]]),(item) => map = true),
 				assentials.route(new Set([1,2]),(item) => set = true),
 				assentials.route(1,() => { return {done:true}; }),
 				assentials.route(1,() => num = undefined),
-				);
+				assentials.route(
+						{
+							[/name/]:"mary"
+						},
+						(item) => object = true
+					),
+				assentials.route(
+					{
+						[(key) => /name/.test(key)]:"bill"
+					},
+					(item) => object = true
+				),
+				assentials.route(
+						{
+							[function (key) {
+								/name/.test(key)
+							}]:"john"
+						},
+						(item) => object = true
+					)
+			);
 		it("object", async () => {
 			const result = await router({id:1});
 			expect(result.done).equal(true);
@@ -294,6 +317,18 @@ describe("route",function() {
 			set = undefined;
 			const result = await router(new Set([1,3]));
 			expect(set).equal(undefined);
+		});
+		it("object regexp", async () => {
+			const result = await router({age:27,name:"mary"});
+			expect(object).equal(true);
+		});
+		it("object arrow", async () => {
+			const result = await router({age:27,name:"bill"});
+			expect(object).equal(true);
+		});
+		it("object function", async () => {
+			const result = await router({age:27,name:"john"});
+			expect(object).equal(true);
 		});
 	});
 });

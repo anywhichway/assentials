@@ -3,11 +3,14 @@
 	
 	const Generator = Object.getPrototypeOf((function*() {})()).constructor,
 		AsyncGenerator = Object.getPrototypeOf((async function*() {})()).constructor,
-		leftEqual = (a,b) => {
+		leftEqual = async (a,b) => {
 		  if(a===b) return true;
 		  if(typeof(a)!==typeof(b)) return false;
 		  if((a && !b) || (!a && b)) return false;
 		  if(a && typeof(a)==="object") {
+		  	if(a instanceof RegExp) {
+		  		 return a.test(b);
+		  	}
 		  	if(a instanceof Date) {
 		  		if(!(b instanceof Date)) return false;
 		  		return a.getTime()===b.getTime();
@@ -18,7 +21,7 @@
 		  		if(!(b instanceof Map)) return false;
 		  		if(a.size!==b.size) return false;
 		  		for(const [key,value] of a) {
-		  			if(!leftEqual(value,b.get(key))) return false;
+		  			if(!await leftEqual(value,b.get(key))) return false;
 		  		}
 		  		return true;
 		  	} else if(a instanceof Set) {
@@ -30,7 +33,7 @@
 		  				results.add(avalue);
 		  			} else {
 			  			for(const bvalue of b) {
-			  				if(leftEqual(avalue,bvalue)) {
+			  				if(await leftEqual(avalue,bvalue)) {
 			  					results.add(avalue);
 			  				}
 			  			}
@@ -39,12 +42,25 @@
 		  		if(results.size!=a.size) return false;
 		  		return true;
 		  	} else{
-			    return Object.keys(a).every(function(key) { return leftEqual(a[key],b[key]); });
+			    return await every(Object.keys(a),async (key) => { 
+			    	const test = toTest(key,true);
+			    	if(typeof(test)==="function") {
+			    		let count = 0;
+			    		return await every(Object.keys(b),async (rkey) => {
+			    			if(await test.call(a,rkey)) {
+			    				count++;
+			    				return await leftEqual(a[key],b[rkey]);
+			    			}
+				    		return true;
+			    		}) && count > 0;
+			    	}
+			    	return await leftEqual(a[key],b[key]); 
+			    });
 		  	}
 		  }
 		  return false;
 		},
-		_reduceIterable = async (iterable,f,accum,{continuable,data,tree,nodes}) => {
+	_reduceIterable = async (iterable,f,accum,{continuable,data,tree,nodes}) => {
 		let i = 0;
 		for await(const item of iterable) {
 			let [key,value] = data instanceof Map || tree ? item : [i,item];
@@ -184,7 +200,7 @@
 			iterable = Object.entries(data);
 			tree = true;
 		}
-		return await _reduceIterable(iterable,(accum,value) => f(value) ? accum : undefined,true,{continuable:false,nodes,tree,data}) ? true : false;
+		return await _reduceIterable(iterable,async (accum,value) => await f(value) ? accum : undefined,true,{continuable:false,nodes,tree,data}) ? true : false;
 	},
 	some = async (data,f,nodes) => {
 		let iterable = data, tree, found;
@@ -198,8 +214,8 @@
 			iterable = Object.entries(data);
 			tree = true;
 		}
-		await _reduceIterable(iterable,(accum,value) => { 
-					if(f(value)) {
+		await _reduceIterable(iterable,async (accum,value) => { 
+					if(await f(value)) {
 						found = true;
 						return undefined;
 					}
@@ -209,10 +225,28 @@
 		return found;
 	},
 	exposes = (target,api) => Object.keys(api).every((key) => typeof(target[key])==="function"),
-	toTest = (data) => {
+	toTest = (data,property) => {
 		const type = typeof(data);
 		if(type==="function") {
 			return data;
+		}
+		if(property) {
+			if(type==="string") {
+				const key = data.replace(/\n/g,"");
+				try {
+					const i = key.lastIndexOf("/");
+					if(key[0]==="/" && i>0) {
+							const exp = key.substring(1,i),
+								flags = key.substring(i+1),
+								regexp = new RegExp(exp,flags);
+							return (key) => regexp.test(key);
+					} else if(key.startswith("function") || `/\(*\)*=>*`.test(key)) {
+							return Function("return " + key)();
+					}
+				} catch(e) {
+					;
+				}
+			}
 		}
 		if(data===null || ["boolean","number","string"].includes(type)) {
 			return arg => arg===data;
@@ -222,7 +256,7 @@
 				return arg => data.test(arg);
 			}
 		}
-		return arg => leftEqual(data,arg);
+		return (arg) => leftEqual(data,arg);
 	},
 	// like pipe, but stops when accum is undefined
 	flow = (...values) => async (arg) => {
