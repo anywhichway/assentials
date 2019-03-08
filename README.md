@@ -94,7 +94,7 @@ All sequence processing functions take one or more functions or literal values a
 
 * Processes each argument by providing as an input the output of the previous argument's evaluation. As a result, any literals will simply replace the value from upstream and become the input for the next argument's evaluation. The flow will continue through the last argument and return its evaluation. Functions within the flow must know how to handle `undefined` if an upstream argument can possibly evaluate to `undefined`. Think of it like a a real peipe that still exists even when there is nothing flowing through it.
 
-`async any route(any condition,function||any arg)(input)`
+`async any route(any condition,function||any arg[,...])(input)`
 
  * Tests the `condition` against the `input`, and if `true` process each arg until the end or one evaluates to `undefined` or 
  `{value: any value, done:  boolean true}`. Note: if returning a done indicator, it must have at most two keys, `done` and `value` or just `done`. This minimizes the chance of accidental aborts when inputs happen to contain properties by the name `value` or `done`, which would be hard to debug.
@@ -167,12 +167,17 @@ All sequence processing functions take one or more functions or literal values a
  
  You can also use a router for generalized destructive object transformation, which is effectively what is happening above. For non-destructive transformation us `map`.
  
+ `async boolean trigger(any condition,function callback,[...])(input)`
+ 
+ * Immediately returns the result of evaluating condition. The calls each callback. If you want to to conditionalize how the callbacks operate, then wrap them in a `flow`, `route`, `when`, or even another `trigger`.
+ 
+ * See `route` for how `condition` is tested.
+ 
 
-`async any when(any condition,function||any arg)(input)`
+`async any when(any condition,function||any arg[,...])(input)`
 
  * Tests the `condition` against the `input`, and if `true` process each arg until the end or one evaluates to `undefined` or `{value: any value, done:  boolean true}`. Note: if returning a done indicator, it must have at most two keys, `done` and `value` or just `done`. This minimizes the chance of accidental aborts which would be hard to debug. Returns the last evalutation. Otherwise, if the condition fails, returns the `input`.
  
- * See `route` for how `condition` is tested.
 
 
 ## Parallel Processing Functions
@@ -198,6 +203,8 @@ Converting keys into regular expression tests or functions. For keys that start 
 ```
 
 # Updates (reverse chronological order)
+
+2019-03-08 v1.0.10 added `trigger`
 
 2019-03-04 v1.0.9 added regular expression and functional keys in left equal
 

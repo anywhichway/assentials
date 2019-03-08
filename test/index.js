@@ -224,6 +224,26 @@ describe("when",function() {
 	});
 })
 
+describe("trigger",function() {
+	it("true",async () => {
+		let resolver = false;
+		const promise = new Promise((resolve) => resolver = resolve);
+		const result = await assentials.trigger(async (arg)=>arg,(arg) => resolver(triggered=arg))(true);
+		expect(result).equal(true);
+		await promise;
+		expect(triggered).equal(true);
+	});
+	it("false",async () => {
+		let triggered = false;
+		const promise = new Promise((resolve) => resolver = resolve);
+		const result = await assentials.trigger(async (arg)=>arg,(arg) => resolver(triggered=arg))(false);
+		expect(result).equal(false);
+		setTimeout(() => resolver(result));
+		await promise;
+		expect(triggered).equal(false);
+	});
+})
+
 describe("route",function() {
 	it("all succeed",async () => {
 		const result = await assentials.route(({sum}) => typeof(sum)==="number",o => o.sum+=1,o => o.sum+=2,o => o.sum+=3)({sum:0});

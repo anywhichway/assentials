@@ -274,7 +274,17 @@
 			: value
 		},arg)
 	},
-	// if condition (a function, a RegExp, a literal to compare to arg) is true; 
+	// returns condition (a function, a RegExp, a literal to compare to arg) evaluation
+	// if true before returning sets a timeout to start processing all callbacks
+	trigger = (condition,...results) => async (arg) => {
+		let done;
+		if(condition!==undefined && await toTest(condition)(arg)) {
+			setTimeout(() => results.forEach((result) => result(arg)));
+			return true;
+		}
+		return false;
+	},
+	//if condition (a function, a RegExp, a literal to compare to arg) is true; 
 	// evaluates the results using the arg until one is undefined or all are evaluated, return final evaluation
 	// else returns the arg passed in  (which may have been modified)
 	when = (condition,...results) => async (arg) => {
@@ -335,7 +345,7 @@
 		return results;
 	},
 
-	assentials = {every,exposes,flow,forEach,map,parallel,pipe,reduce,route,router,some,when}
+	assentials = {every,exposes,flow,forEach,map,parallel,pipe,reduce,route,router,some,when,trigger}
 	
 	if(typeof(module)!=="undefined") module.exports = assentials;
 	if(typeof(window)!=="undefined") window.assentials = assentials;
