@@ -11,12 +11,12 @@
 		  	if(a instanceof RegExp) {
 		  		 return a.test(b);
 		  	}
+		  	if(Array.isArray(a)) {
+			  	if(!Array.isArray(b)) return false;
+			  } 
 		  	if(a instanceof Date) {
 		  		if(!(b instanceof Date)) return false;
 		  		return a.getTime()===b.getTime();
-		  	} else if(Array.isArray(a)) {
-		  		if(!Array.isArray(b)) return false;
-		  		if(a.length!==b.length) return false;
 		  	} else if(a instanceof Map) {
 		  		if(!(b instanceof Map)) return false;
 		  		if(a.size!==b.size) return false;
@@ -345,7 +345,7 @@
 		return results;
 	},
 
-	assentials = {every,exposes,flow,forEach,map,parallel,pipe,reduce,route,router,some,when,trigger}
+	assentials = {every,exposes,flow,forEach,map,parallel,pipe,reduce,route,router,some,when,trigger,leftEqual}
 	
 	if(typeof(module)!=="undefined") module.exports = assentials;
 	if(typeof(window)!=="undefined") window.assentials = assentials;

@@ -8,6 +8,17 @@ if(typeof(window)==="undefined") {
 	assentials = require("../index.js");
 }
 
+describe("leftEqual",function() {
+	it("array",async () => {
+		const result = await assentials.leftEqual([1,2],[1,2,3]);
+		expect(result).equal(true);
+	});
+	it("array fail",async () => {
+		const result = await assentials.leftEqual([1,2],[1,3,2]);
+		expect(result).equal(false);
+	})
+});
+
 describe("every",function() {
 	it("array",async () => {
 		const result = await assentials.every([1,2,3],item => typeof(item)==="number");

@@ -204,6 +204,8 @@ Converting keys into regular expression tests or functions. For keys that start 
 
 # Updates (reverse chronological order)
 
+2019-03-16 v1.0.11 exported `leftEqual`, corrected issue where `leftEqual` did not work on arrays.
+
 2019-03-08 v1.0.10 added `trigger`
 
 2019-03-04 v1.0.9 added regular expression and functional keys in left equal

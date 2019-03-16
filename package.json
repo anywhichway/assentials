@@ -1,6 +1,6 @@
 {
   "name": "assentials",
-  "version": "v0.0.10",
+  "version": "v0.0.11",
   "description": "Essential polymorphic async functions ... every, forEach, map, reduce, some, flow, pipe, when, route and more!",
   "engines": {},
   "license": "MIT",
