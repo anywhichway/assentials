@@ -99,11 +99,11 @@ All sequence processing functions take one or more functions or literal values a
  * Tests the `condition` against the `input`, and if `true` process each arg until the end or one evaluates to `undefined` or 
  `{value: any value, done:  boolean true}`. Note: if returning a done indicator, it must have at most two keys, `done` and `value` or just `done`. This minimizes the chance of accidental aborts when inputs happen to contain properties by the name `value` or `done`, which would be hard to debug.
  
-  * For convenience, there is a `router(route aRoute[,...])` which takes a bunch of routes as its arguments. This function is itself a route whose first condition is always met. This allows nesting of routes.
+  * For convenience, there is a `router(route aRoute[,...])` which takes a bunch of routes as its arguments. This function is itself a `when` whose first condition is always met. This allows nesting of routes.
  
  * When used in the context of a `router`, a `route` that returns `{done: true}` will cause the router to immediatelly return; whereas `undefined` will allow the next route to be processed. 
  
- * A router always returns the `input` or `{value,done:true}`. Think of it like a package routing through many handlers who may look at or modify the contents of the package, but at the end of the day must deliver it to the next recipient in the chain before it utlimately gets delivered to the requestor, unless a valid substituion is provided via  `{value,done:true}`.
+ * A router always returns the `input` or the `value` from `{value,done:true}`. Think of it like a package routing through many handlers who may look at or modify the contents of the package, but at the end of the day must deliver it to the next recipient in the chain before it utlimately gets delivered to the requestor, unless a valid substituion is provided via  `{value,done:true}`.
  
  * If the `condition` is a function it receives the argument and must return true if the route is to be proceesed.
  
@@ -203,6 +203,8 @@ Converting keys into regular expression tests or functions. For keys that start 
 ```
 
 # Updates (reverse chronological order)
+
+2019-03-20 v1.0.12 `router` was returning the Iterable control object instead of just its value, fixed.
 
 2019-03-16 v1.0.11 exported `leftEqual`, corrected issue where `leftEqual` did not work on arrays.
 

@@ -265,15 +265,15 @@ describe("route",function() {
 		const router = assentials.router(
 				assentials.route(({id})=>id===1,(item) => item.done=true),
 				assentials.route(/aPath/,(item) => regexp = true),
-				assentials.route(1,(item) => num = item),
+				assentials.route(1,(item) => { return {done:true,value:item}; }),
 				assentials.route({name:"joe",age:27},
 						(item) => {
 							return object = true;
 						}),
 				assentials.route(new Map([[1,1],[2,2]]),(item) => map = true),
 				assentials.route(new Set([1,2]),(item) => set = true),
-				assentials.route(1,() => { return {done:true}; }),
-				assentials.route(1,() => num = undefined),
+				//assentials.route(1,() => { return {done:true}; }),
+				//assentials.route(1,() => num = undefined),
 				assentials.route(
 						{
 							[/name/]:"mary"
@@ -314,8 +314,7 @@ describe("route",function() {
 		});
 		it("literal with done", async () => {
 			const result = await router(1);
-			expect(num).equal(1);
-			expect(result.done).equal(true);
+			expect(result).equal(1);
 		});
 		it("literal fail", async () => {
 			num = undefined;

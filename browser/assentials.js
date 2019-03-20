@@ -310,9 +310,9 @@
 	// if condition (a function, a RegExp, a literal to compare to arg) is true; 
 	// evaluates the results using the arg until one is undefined, {done: true}, or all are evaluated
 	// regardless of results, returns the arg passed in (which may have been modified) unless
-	// the evaluation was {value,done:true}, in which case that is returned
+	// the evaluation was {value,done:true}, in which case the value in that is returned
 	route = (condition,...results) => async (arg) => {
-		let done;
+		let done, last;
 		if(condition!==undefined && await toTest(condition)(arg)) {
 			for(let value of results) {
 				if(typeof(value)==="function") {
@@ -321,16 +321,17 @@
 				if(value && typeof(value)==="object") {
 					const keys = Object.keys(value);
 					if(keys.length<=2 && value.done && keys.every(key => key==="done" || key==="value")) {
-						done = value;
+						done = true;
+						last = value.value;
 					}
 				}
 				if(value===undefined || done) break;
 			}
 		}
-		return done || arg;
+		return done ? last : arg;
 	},
 	router = (...routes) => {
-		return route(()=>true,...routes);
+		return when(()=>true,...routes);
 	},
 	parallel = (...values) => async (...args) => {
 		const promises = [],
