@@ -257,15 +257,19 @@ describe("trigger",function() {
 
 describe("route",function() {
 	it("all succeed",async () => {
-		const result = await assentials.route(({sum}) => typeof(sum)==="number",o => o.sum+=1,o => o.sum+=2,o => o.sum+=3)({sum:0});
+		const result = await assentials.route(({sum}) => typeof(sum)==="number",o => o.sum+=1,o => o.sum+=2,o => o.sum+=3,o => ({value:o,done:true}))({sum:0});
 		expect(result.sum).equal(6);
 	});
 	describe("router",function() {
-		let regexp, num, object, map, set;
+		let num, object, map, set;
 		const router = assentials.router(
 				assentials.route(({id})=>id===1,(item) => item.done=true),
-				assentials.route(/aPath/,(item) => regexp = true),
-				assentials.route(1,(item) => { return {done:true,value:item}; }),
+				assentials.route(/aPath/,(item) => { 
+					return {value:true,done:true}; 
+				}),
+				assentials.route(1,(item) => { 
+					return {done:true,value:item}; 
+				}),
 				assentials.route({name:"joe",age:27},
 						(item) => {
 							return object = true;
@@ -305,7 +309,7 @@ describe("route",function() {
 		});
 		it("regexp", async () => {
 			const result = await router("aPath");
-			expect(regexp).equal(true);
+			expect(result).equal(true);
 		});
 		it("regexp fail", async () => {
 			regexp = undefined;

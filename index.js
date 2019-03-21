@@ -327,10 +327,8 @@
 	},
 	// if condition (a function, a RegExp, a literal to compare to arg) is true; 
 	// evaluates the results using the arg until one is undefined, {done: true}, or all are evaluated
-	// regardless of results, returns the arg passed in (which may have been modified) unless
-	// the evaluation was {value,done:true}, in which case the value in that is returned
+	// returns value from {value:value,done:true} when it occurs or undefined no step returns {value:value,done:true}
 	route = (condition,...results) => async (arg) => {
-		let done, last;
 		if(condition!==undefined && await toTest(condition)(arg)) {
 			for(let value of results) {
 				value = await value;
@@ -340,19 +338,18 @@
 				if(value && typeof(value)==="object") {
 					const keys = Object.keys(value);
 					if(value.done && keys.every(key => key==="done" || key==="value")) {
-						done = true;
-						last = value.value;
+						return value.value;
 					}
 				}
-				if(value===undefined || done) break;
+				if(value===undefined) return;
 			}
 		}
-		return done ? last : arg;
+		return;
 	},
 	router = (...routes) => {
 		return async (arg) => {
-			const result = await until((arg) => arg && typeof(arg)==="object" && arg.done && Object.keys(arg).every(key => key==="done" || key==="value"),...routes)(arg);
-			return result && typeof(result)==="object" && Object.keys(arg).every(key => key==="done" || key==="value") ? result.value : result;
+			const result = await until((arg) => arg!==undefined,...routes)(arg);
+			return result && typeof(result)==="object" && Object.keys(arg).every(key => key==="done" || key==="value") ? result.value : result!==undefined ? result : arg;
 		}
 	},
 	parallel = (...values) => async (...args) => {

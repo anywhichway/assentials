@@ -97,9 +97,9 @@ All sequence processing functions take one or more functions or literal values a
 `async any route(any condition,function||any arg[,...])(input)`
 
  * Tests the `condition` against the `input`, and if `true` process each arg until the end or one evaluates to `undefined` or 
- `{value: any value, done:  boolean true}`. Note: if returning a done indicator, it must have at most two keys, `done` and `value` or just `done`. This minimizes the chance of accidental aborts when inputs happen to contain properties by the name `value` or `done`, which would be hard to debug.
+ `{value: any value, done:  boolean true}`. Note: if returning a done indicator, it must have at most two keys, `done` and `value` or just `done`. This minimizes the chance of accidental aborts when inputs happen to contain properties by the name `value` or `done`, which would be hard to debug. Returns either the replacement `value` or `undefined`.
  
-  * For convenience, there is a `router(route aRoute[,...])` which takes a bunch of routes as its arguments. This function is itself a `when` whose first condition is always met. This allows nesting of routes.
+  * For convenience, there is a `router(route aRoute[,...])` which takes a bunch of routes as its arguments. This function is itself a `until` whose condition is met when a route returns a value that is not undefined. This allows nesting of routes.
  
  * When used in the context of a `router`, a `route` that returns `{done: true}` will cause the router to immediatelly return; whereas `undefined` will allow the next route to be processed. 
  
@@ -208,7 +208,9 @@ Converting keys into regular expression tests or functions. For keys that start 
 
 # Updates (reverse chronological order)
 
-2019-03-21 v1.0.12 Added `until`. Modified `router` to use `until` rather than `when`, which could have resulted in extra routes being run.
+2019-03-21 v1.0.14 Further refinements to router. WARNING: The behavior of `route` has changed. To exit a route return `{value:value,done:true}`. If a route does not exit, if now returns `undefined` by default.
+
+2019-03-21 v1.0.13 Added `until`. Modified `router` to use `until` rather than `when`, which could have resulted in extra routes being run.
 
 2019-03-20 v1.0.12 `router` was returning the Iterable control object instead of just its value, fixed.
 
