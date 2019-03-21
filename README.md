@@ -173,6 +173,10 @@ All sequence processing functions take one or more functions or literal values a
  
  * See `route` for how `condition` is tested.
  
+ `async any until(condition,...functions)(input)`
+ 
+ Calls functions with `input` until condition is met and then returns the `input`'
+
 
 `async any when(any condition,function||any arg[,...])(input)`
 
@@ -203,6 +207,8 @@ Converting keys into regular expression tests or functions. For keys that start 
 ```
 
 # Updates (reverse chronological order)
+
+2019-03-21 v1.0.12 Added `until`. Modified `router` to use `until` rather than `when`, which could have resulted in extra routes being run.
 
 2019-03-20 v1.0.12 `router` was returning the Iterable control object instead of just its value, fixed.
 

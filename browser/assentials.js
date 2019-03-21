@@ -284,7 +284,24 @@
 		}
 		return false;
 	},
-	//if condition (a function, a RegExp, a literal to compare to arg) is true; 
+	// condition  = (a function, a RegExp, a literal to compare to arg) is true; 
+	// evaluates the results using the arg until one satifies condition or all are evaluated, return satisfying result
+	// else returns the arg passed in  (which may have been modified)
+	until = (condition,...functions) => async (arg) => {
+		const test = toTest(await condition);
+		let result;
+		for(let value of functions) {
+			value = await toTest(await value);
+			if(typeof(value)==="function") {
+				value = await value(arg);
+			}
+			if(await test(value)) {
+				return value;
+			}
+		}
+		return arg;
+	},
+	// if condition (a function, a RegExp, a literal to compare to arg) is true; 
 	// evaluates the results using the arg until one is undefined or all are evaluated, return final evaluation
 	// else returns the arg passed in  (which may have been modified)
 	when = (condition,...results) => async (arg) => {
@@ -292,6 +309,7 @@
 		if(condition!==undefined && await toTest(condition)(arg)) {
 			let result;
 			for(let value of results) {
+				value = await value;
 				if(typeof(value)==="function") {
 					result = await value(arg);
 				}
@@ -315,12 +333,13 @@
 		let done, last;
 		if(condition!==undefined && await toTest(condition)(arg)) {
 			for(let value of results) {
+				value = await value;
 				if(typeof(value)==="function") {
 					value = await value(arg);
 				}
 				if(value && typeof(value)==="object") {
 					const keys = Object.keys(value);
-					if(keys.length<=2 && value.done && keys.every(key => key==="done" || key==="value")) {
+					if(value.done && keys.every(key => key==="done" || key==="value")) {
 						done = true;
 						last = value.value;
 					}
@@ -331,7 +350,10 @@
 		return done ? last : arg;
 	},
 	router = (...routes) => {
-		return when(()=>true,...routes);
+		return async (arg) => {
+			const result = await until((arg) => arg && typeof(arg)==="object" && arg.done && Object.keys(arg).every(key => key==="done" || key==="value"),...routes)(arg);
+			return result && typeof(result)==="object" && Object.keys(arg).every(key => key==="done" || key==="value") ? result.value : result;
+		}
 	},
 	parallel = (...values) => async (...args) => {
 		const promises = [],
