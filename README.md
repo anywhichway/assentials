@@ -10,7 +10,7 @@ The `assentials` library also provides asynchronous sequenced processing of func
 
 Finally, there is a `parallel` function which will provide the same argument to multiple functions and run them in parallel (to the degree JavaScript supports parallel processing). It returns a `Promise` for an array of the final results in the order they are resolved.
 
-All the above in about 1.6K minimized and gziped, 5K minimized, 10K raw!
+All the above in about 2K minimized and gziped, 7K minimized, 12K raw!
 
 # installation
 
@@ -208,30 +208,32 @@ Converting keys into regular expression tests or functions. For keys that start 
 
 # Updates (reverse chronological order)
 
-2019-03-21 v1.0.14 Further refinements to router. WARNING: The behavior of `route` has changed. To exit a route return `{value:value,done:true}`. If a route does not exit, if now returns `undefined` by default.
+2019-05-08 v1.0.0 Moved to JavaScript modules format for index.js. Webpack produces ./browser/assentials.min.js. There is no longer a non-minified browser file. The index.js file is webpack tree shaking compatible.
 
-2019-03-21 v1.0.13 Added `until`. Modified `router` to use `until` rather than `when`, which could have resulted in extra routes being run.
+2019-03-21 v0.0.14 Further refinements to router. WARNING: The behavior of `route` has changed. To exit a route return `{value:value,done:true}`. If a route does not exit, if now returns `undefined` by default.
 
-2019-03-20 v1.0.12 `router` was returning the Iterable control object instead of just its value, fixed.
+2019-03-21 v0.0.13 Added `until`. Modified `router` to use `until` rather than `when`, which could have resulted in extra routes being run.
 
-2019-03-16 v1.0.11 exported `leftEqual`, corrected issue where `leftEqual` did not work on arrays.
+2019-03-20 v0.0.12 `router` was returning the Iterable control object instead of just its value, fixed.
 
-2019-03-08 v1.0.10 added `trigger`
+2019-03-16 v0.0.11 exported `leftEqual`, corrected issue where `leftEqual` did not work on arrays.
 
-2019-03-04 v1.0.9 added regular expression and functional keys in left equal
+2019-03-08 v0.0.10 added `trigger`
 
-2019-03-03 v1.0.8 documentation updates
+2019-03-04 v0.0.9 added regular expression and functional keys in left equal
 
-2019-02-20 v1.0.7b `router` redefined to use a `when` as its top level to allow it to return the `value` in `{value,done:true}` if it is not `undefined`.
+2019-03-03 v0.0.8 documentation updates
 
-2019-02-19 v1.0.6b In one case leftEqual switched order or left and right. Fixed.
+2019-02-20 v0.0.7b `router` redefined to use a `when` as its top level to allow it to return the `value` in `{value,done:true}` if it is not `undefined`.
 
-2019-02-19 v1.0.5b Correct object matching for routes to be leftEqual.
+2019-02-19 v0.0.6b In one case leftEqual switched order or left and right. Fixed.
 
-2019-02-18 v1.0.4b Added support for the `Iterable` continuation object `{value,done}` with `when` and `route`.
+2019-02-19 v0.0.5b Correct object matching for routes to be leftEqual.
 
-2019-02-18 v1.0.3b Minor deep equal enhancement.
+2019-02-18 v0.0.4b Added support for the `Iterable` continuation object `{value,done}` with `when` and `route`.
 
-2019-02-16 v1.0.2b Added object literal routing.
+2019-02-18 v0.0.3b Minor deep equal enhancement.
 
-2019-02-16 v1.0.0b Initial public release.
+2019-02-16 v0.0.2b Added object literal routing.
+
+2019-02-16 v0.0.0b Initial public release.

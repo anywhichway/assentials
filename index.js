@@ -1,4 +1,3 @@
-(function() {
 	"use strict";
 	
 	const Generator = Object.getPrototypeOf((function*() {})()).constructor,
@@ -363,10 +362,13 @@
 		}
 		await Promise.all(promises);
 		return results;
-	},
+	};
 
-	assentials = {every,exposes,flow,forEach,map,parallel,pipe,reduce,route,router,some,when,trigger,leftEqual}
+	const __assentials__ = {every,exposes,flow,forEach,map,parallel,pipe,reduce,route,router,some,when,trigger,leftEqual};
 	
-	if(typeof(module)!=="undefined") module.exports = assentials;
-	if(typeof(window)!=="undefined") window.assentials = assentials;
-}).call(this)
+	export {__assentials__ as assentials};
+	
+	if(typeof(window)!=="undefined") {
+		window.assentials = __assentials__;
+	}
+	

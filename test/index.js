@@ -2,11 +2,6 @@ var mocha,
 	chai,
 	expect,
 	assentials;
-if(typeof(window)==="undefined") {
-	chai = require("chai");
-	expect = chai.expect;
-	assentials = require("../index.js");
-}
 
 describe("leftEqual",function() {
 	it("array",async () => {
