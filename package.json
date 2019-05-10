@@ -1,12 +1,13 @@
 {
   "name": "assentials",
-  "version": "v1.0.0",
+  "version": "v1.0.2",
   "description": "Essential polymorphic async functions ... every, forEach, map, reduce, some, flow, pipe, when, route and more!",
   "engines": {},
   "license": "MIT",
-   "sideEffects": false,
+  "sideEffects": false,
   "scripts": {
-    "prepare": "webpack index.js -o ./browser/assentials.min.js"
+    "prepare": "webpack index.js -o ./browser/assentials.min.js",
+    "test": "mocha test/index.js"
   },
   "repository": {
     "type": "git",

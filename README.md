@@ -208,6 +208,10 @@ Converting keys into regular expression tests or functions. For keys that start 
 
 # Updates (reverse chronological order)
 
+2019-05-10 v1.0.2 Reverted to old module format. Too many interal projects at AnyWhichWay were breaking when trying to use new module format.
+
+2019-05-09 v1.0.1 Revised export to export specific functions not entire module.
+
 2019-05-08 v1.0.0 Moved to JavaScript modules format for index.js. Webpack produces ./browser/assentials.min.js. There is no longer a non-minified browser file. The index.js file is webpack tree shaking compatible.
 
 2019-03-21 v0.0.14 Further refinements to router. WARNING: The behavior of `route` has changed. To exit a route return `{value:value,done:true}`. If a route does not exit, if now returns `undefined` by default.
